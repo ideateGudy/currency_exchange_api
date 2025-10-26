@@ -370,7 +370,7 @@ GET /countries/image
 <img src="http://localhost:3000/countries/image" alt="Country Summary" />
 ```
 
-![Summary Image Example](./cache/summary.png)
+![Summary Image](./cache/summary.png)
 
 ---
 
