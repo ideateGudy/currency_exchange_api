@@ -362,13 +362,7 @@ Retrieve a PNG image with country statistics (top 5 by GDP).
 GET /countries/image
 ```
 
-**Response:** PNG image file (binary data)
-
-**Example Usage:**
-
-```html
-<img src="http://localhost:3000/countries/image" alt="Country Summary" />
-```
+**Response:** PNG image file
 
 ![Summary Image](./cache/summary.png)
 
