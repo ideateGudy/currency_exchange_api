@@ -1,16 +1,26 @@
 import type { Request, Response, NextFunction } from 'express';
 import config from '../config/config.ts';
+import { customApiError } from '../utils/apiError.ts';
 
-interface AppError extends Error {
-  status?: number;
-  details?: any;
-}
+// interface AppError extends Error {
+//   status?: number;
+//   details?: any;
+// }
 
 const nodeEnv = config.NODE_ENV || 'development';
 
-export const errorHandler = (err: AppError, req: Request, res: Response, next: NextFunction) =>{
+export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) =>{
   console.error(`[Error] ${err.message}`);
 
+
+  if (err instanceof customApiError) {
+        res.status(err.status || 500).json({
+            status: "error",
+            message: err.message,
+            stack: nodeEnv === "development" ? err.stack : undefined,
+        });
+        return;
+    }
 
   const status = err.status || 500;
   const response: Record<string, any> = {
