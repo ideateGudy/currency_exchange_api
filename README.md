@@ -8,7 +8,6 @@ A robust REST API built with **Express.js** and **TypeScript** that provides com
 - [Architecture](#architecture)
 - [Prerequisites](#prerequisites)
 - [Installation & Setup](#installation--setup)
-- [Environment Configuration](#environment-configuration)
 - [Running the API](#running-the-api)
 - [API Endpoints](#api-endpoints)
 - [Request Examples](#request-examples)
@@ -39,7 +38,7 @@ A robust REST API built with **Express.js** and **TypeScript** that provides com
 
 ### High-Level Overview
 
-```
+```bash
 ┌─────────────────────────────────────────────────────┐
 │           Client / Frontend Application             │
 └──────────────────────────────┬──────────────────────┘
@@ -110,6 +109,7 @@ npm install
 ```
 
 This installs all required packages:
+
 - `express`: Web framework
 - `axios`: HTTP client for external APIs
 - `@prisma/client`: ORM client
@@ -142,6 +142,7 @@ EXTERNAL_TIMEOUT_MS=10000
 ```
 
 **Environment Variables Explanation:**
+
 - `NODE_ENV`: Application environment (development/production)
 - `PORT`: Server port (default 3000)
 - `DATABASE_URL`: MySQL connection string
@@ -161,6 +162,7 @@ npm run prisma:migrate
 ```
 
 These commands:
+
 1. Generate the Prisma Client (TypeScript types for database)
 2. Create/update MySQL database tables
 
@@ -207,6 +209,7 @@ POST /countries/refresh
 ```
 
 **Response (Success - 200):**
+
 ```json
 {
   "message": "Countries refreshed successfully",
@@ -219,6 +222,7 @@ POST /countries/refresh
 ```
 
 **Response (Error - 503):**
+
 ```json
 {
   "error": "External data source unavailable",
@@ -237,6 +241,7 @@ GET /countries?region=Africa&currency=ZAR&sort=gdp_desc
 ```
 
 **Query Parameters:**
+
 | Parameter | Type | Description | Example |
 |-----------|------|-------------|---------|
 | `region` | string | Filter by region | `Africa`, `Europe`, `Americas` |
@@ -244,12 +249,12 @@ GET /countries?region=Africa&currency=ZAR&sort=gdp_desc
 | `sort` | string | Sort order | `gdp_desc`, `gdp_asc`, or default (by name) |
 
 **Response (Success - 200):**
+
 ```json
 [
   {
     "id": 1,
     "name": "South Africa",
-    "nameLower": "south africa",
     "capital": "Pretoria",
     "region": "Africa",
     "population": 59308690,
@@ -273,21 +278,23 @@ GET /countries/:name
 ```
 
 **URL Parameters:**
+
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `name` | string | Country name (case-insensitive) |
 
 **Example:**
+
 ```http
 GET /countries/Nigeria
 ```
 
 **Response (Success - 200):**
+
 ```json
 {
   "id": 5,
   "name": "Nigeria",
-  "nameLower": "nigeria",
   "capital": "Abuja",
   "region": "Africa",
   "population": 223804632,
@@ -300,6 +307,7 @@ GET /countries/Nigeria
 ```
 
 **Response (Error - 404):**
+
 ```json
 {
   "error": "Country not found"
@@ -317,16 +325,19 @@ DELETE /countries/:name
 ```
 
 **URL Parameters:**
+
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `name` | string | Country name (case-insensitive) |
 
 **Example:**
+
 ```http
 DELETE /countries/Nigeria
 ```
 
 **Response (Success - 200):**
+
 ```json
 {
   "message": "Nigeria deleted successfully"
@@ -334,6 +345,7 @@ DELETE /countries/Nigeria
 ```
 
 **Response (Error - 404):**
+
 ```json
 {
   "error": "Country not found"
@@ -353,6 +365,7 @@ GET /countries/image
 **Response:** PNG image file (binary data)
 
 **Example Usage:**
+
 ```html
 <img src="http://localhost:3000/countries/image" alt="Country Summary" />
 ```
@@ -368,6 +381,7 @@ GET /status
 ```
 
 **Response (Success - 200):**
+
 ```json
 {
   "total_countries": 195,
@@ -490,6 +504,7 @@ await API.delete('/countries/Nigeria');
 The API implements centralized error handling with the following error scenarios:
 
 ### 1. **Missing Required Fields**
+
 ```json
 {
   "error": "Validation failed",
@@ -499,6 +514,7 @@ The API implements centralized error handling with the following error scenarios
 ```
 
 ### 2. **Resource Not Found**
+
 ```json
 {
   "error": "Country not found",
@@ -507,6 +523,7 @@ The API implements centralized error handling with the following error scenarios
 ```
 
 ### 3. **External API Failure**
+
 ```json
 {
   "error": "External data source unavailable",
@@ -516,6 +533,7 @@ The API implements centralized error handling with the following error scenarios
 ```
 
 ### 4. **Database Error**
+
 ```json
 {
   "error": "Internal server error",
@@ -524,8 +542,13 @@ The API implements centralized error handling with the following error scenarios
 ```
 
 ### 5. **Rate Limit Exceeded**
-```
-HTTP 429 Too Many Requests
+
+```json
+{
+  "error": "Rate limit exceeded",
+  "details": "Too many requests from this IP",
+  "status": 429
+}
 ```
 
 ---
@@ -535,51 +558,38 @@ HTTP 429 Too Many Requests
 ### Country Table
 
 ```sql
-CREATE TABLE Country (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(255) NOT NULL,
-  nameLower VARCHAR(255) UNIQUE NOT NULL,
-  capital VARCHAR(255),
-  region VARCHAR(255),
-  population BIGINT NOT NULL,
-  currencyCode VARCHAR(10),
-  exchangeRate FLOAT,
-  estimatedGdp FLOAT,
-  flagUrl VARCHAR(500),
-  lastRefreshedAt DATETIME
-);
+model Country {
+  id              String      @id @default(uuid())
+  name            String      @unique
+  capital         String?
+  region          String?
+  population      Int
+  currency_code    String?
+  exchange_rate    Float?
+  estimated_gdp    Float?
+  flag_url         String?
+  last_refreshed_at DateTime
+}
 ```
-
-**Columns:**
-- `id`: Unique identifier
-- `name`: Country name
-- `nameLower`: Lowercase name for case-insensitive searches
-- `capital`: Capital city name
-- `region`: Geographic region
-- `population`: Total population
-- `currencyCode`: ISO 4217 currency code
-- `exchangeRate`: Exchange rate to USD
-- `estimatedGdp`: Calculated GDP estimate
-- `flagUrl`: Country flag SVG URL
-- `lastRefreshedAt`: Last data refresh timestamp
 
 ### Metadata Table
 
 ```sql
-CREATE TABLE Metadata (
-  key VARCHAR(255) PRIMARY KEY,
-  value VARCHAR(500)
-);
+model Metadata {
+  key   String @id
+  value String?
+}
 ```
 
 **Stored Metadata:**
+
 - `last_refreshed_at`: Timestamp of last successful data refresh
 
 ---
 
 ## Project Structure
 
-```
+```bash
 ├── src/
 │   ├── config/
 │   │   ├── config.ts           # Environment configuration & validation
@@ -636,7 +646,9 @@ CREATE TABLE Metadata (
 ## Key Features Explained
 
 ### 1. **Data Refresh Flow**
+
 When `/countries/refresh` is called:
+
 1. Fetches country data from REST Countries API
 2. Fetches exchange rates from ER-API
 3. Calculates estimated GDP: `(population × random_multiplier) / exchange_rate`
@@ -645,11 +657,13 @@ When `/countries/refresh` is called:
 6. Returns success status with refresh timestamp
 
 ### 2. **Rate Limiting**
+
 - Prevents API abuse by limiting requests per IP
 - Configured in `src/utils/rate-limiting.ts`
 - Default: 100 requests per 15 minutes
 
 ### 3. **Image Generation**
+
 - Creates PNG image with:
   - Total countries count
   - Top 5 countries by estimated GDP
@@ -658,13 +672,16 @@ When `/countries/refresh` is called:
 - Canvas library used for native PNG rendering
 
 ### 4. **Filtering & Sorting**
+
 Query parameters allow flexible data retrieval:
+
 - **Filter by region**: `?region=Africa`
 - **Filter by currency**: `?currency=USD`
 - **Sort by GDP**: `?sort=gdp_desc` or `?sort=gdp_asc`
 - **Default sort**: By country name (ascending)
 
 ### 5. **Error Handling**
+
 - Centralized middleware catches all errors
 - Custom `ApiError` class for structured error responses
 - Validation of required environment variables on startup
@@ -675,24 +692,32 @@ Query parameters allow flexible data retrieval:
 ## Troubleshooting
 
 ### Issue: "Missing required environment variable(s)"
+
 **Solution:** Ensure all required variables in `.env` are set and not empty.
 
 ### Issue: "Cannot connect to database"
-**Solution:** 
+
+**Solution:**
+
 - Verify MySQL is running
 - Check DATABASE_URL is correct
 - Ensure database exists: `CREATE DATABASE country_exchange_db;`
 
 ### Issue: "External data source unavailable"
+
 **Solution:**
+
 - Check internet connection
 - Verify external API URLs are accessible
 - Increase `EXTERNAL_TIMEOUT_MS` if APIs are slow
 
 ### Issue: "Port already in use"
+
 **Solution:**
+
 - Change `PORT` in `.env` file
 - Or kill process using the port:
+
   ```bash
   # Windows: netstat -ano | findstr :3000
   # Linux/Mac: lsof -i :3000
@@ -709,6 +734,7 @@ ISC © ideategudy
 ## Contributing
 
 Contributions welcome! Please ensure:
+
 - TypeScript strict mode compliance
 - Code formatted with Prettier
 - ESLint rules pass
