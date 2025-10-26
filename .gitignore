@@ -3,5 +3,3 @@ dist
 .env
 /generated/prisma
 note.md
-
-/generated/prisma
