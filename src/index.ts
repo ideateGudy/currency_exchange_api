@@ -13,6 +13,8 @@ import countryRoutes from "./routes/countryRoute.ts";
 const app: Express = express();
 const PORT = config.PORT;
 
+app.set('trust proxy', 1);
+
 // Middlewares
 app.use(express.json());
 app.use(loggingMiddleware);
