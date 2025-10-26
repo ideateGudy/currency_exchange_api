@@ -133,46 +133,45 @@ export async function refreshCountries() {
 });
 
     const lastRefreshedAt = await metaService.setLastRefreshedAt(now);
-    //  await generateSummaryImage(now);
      await generateSummaryImageDark();
     return {transaction,  lastRefreshedAt}
 }
 
-export async function generateSummaryImage(now?: Date) {
-  const date = now ?? new Date();
-  const { createCanvas } = await import('canvas');
-  const total = await prisma.country.count();
-  const top = await prisma.country.findMany({
-    where: { estimated_gdp: { not: null } },
-    orderBy: { estimated_gdp: 'desc' },
-    take: 5
-  });
+// export async function generateSummaryImage(now?: Date) {
+//   const date = now ?? new Date();
+//   const { createCanvas } = await import('canvas');
+//   const total = await prisma.country.count();
+//   const top = await prisma.country.findMany({
+//     where: { estimated_gdp: { not: null } },
+//     orderBy: { estimated_gdp: 'desc' },
+//     take: 5
+//   });
 
-  const canvas = createCanvas(1000, 600);
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(0, 0, 1000, 600);
+//   const canvas = createCanvas(1000, 600);
+//   const ctx = canvas.getContext('2d');
+//   ctx.fillStyle = '#fff';
+//   ctx.fillRect(0, 0, 1000, 600);
 
-  ctx.fillStyle = '#111';
-  ctx.font = 'bold 28px Sans';
-  ctx.fillText(`Total countries: ${total}`, 40, 60);
-  ctx.font = '20px Sans';
-  ctx.fillText(`Last refresh: ${date.toISOString()}`, 40, 100);
+//   ctx.fillStyle = '#111';
+//   ctx.font = 'bold 28px Sans';
+//   ctx.fillText(`Total countries: ${total}`, 40, 60);
+//   ctx.font = '20px Sans';
+//   ctx.fillText(`Last refresh: ${date.toISOString()}`, 40, 100);
 
-  ctx.font = '22px Sans';
-  ctx.fillText('Top 5 countries by estimated_gdp:', 40, 150);
+//   ctx.font = '22px Sans';
+//   ctx.fillText('Top 5 countries by estimated_gdp:', 40, 150);
 
-  let y = 190;
-  for (const row of top) {
-    ctx.font = '18px Sans';
-    ctx.fillText(`${row.name} — ${row.estimated_gdp?.toLocaleString() ?? 'N/A'}`, 60, y);
-    y += 36;
-  }
+//   let y = 190;
+//   for (const row of top) {
+//     ctx.font = '18px Sans';
+//     ctx.fillText(`${row.name} — ${row.estimated_gdp?.toLocaleString() ?? 'N/A'}`, 60, y);
+//     y += 36;
+//   }
 
-  const cacheDir = process.env.CACHE_DIR || './cache';
-  await fs.mkdir(cacheDir, { recursive: true });
-  await fs.writeFile(path.join(cacheDir, 'summary.png'), canvas.toBuffer('image/png'));
-}
+//   const cacheDir = process.env.CACHE_DIR || './cache';
+//   await fs.mkdir(cacheDir, { recursive: true });
+//   await fs.writeFile(path.join(cacheDir, 'summary.png'), canvas.toBuffer('image/png'));
+// }
 
 const CACHE_DIR = process.env.CACHE_DIR
   ? path.resolve(process.cwd(), process.env.CACHE_DIR)
@@ -252,5 +251,6 @@ export default {
   getCountryByName,
   deleteCountry,
   refreshCountries,
-  generateSummaryImage
+  generateSummaryImageDark,
+  getSummaryImagePath
 };
