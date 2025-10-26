@@ -29,6 +29,6 @@ model Country {
 }
 
 model Metadata {
-  key   String @id
+  key   String  @id
   value String?
 }
